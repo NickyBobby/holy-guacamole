@@ -81,6 +81,10 @@ class EventService(
                     channel = event.channel,
                     text = craftMyLeaderboardMessage(repository.getLeaderboard(0), event.user?: "user not found")
                 )
+                text.contains(Regex("$LEADERBOARD_COMMAND @*")) -> slackClient.postMessage(
+                    channel = event.channel,
+                    text = craftMyLeaderboardMessage(repository.getLeaderboard(0), text.split("@")[2])
+                )
                 text.contains(Regex("$LEADERBOARD_COMMAND \\d*")) -> slackClient.postMessage(
                         channel = event.channel,
                         text = craftLeaderboardMessage(repository.getLeaderboard(
@@ -291,6 +295,18 @@ class EventService(
                 "${avocadoCounts.indexOf(it) + 1}. $user: ${it.count}"
             }
             .joinToString(separator = "\n")
+
+//    private fun craftUserLeaderboardMessage(avocadoCounts: List<AvocadoCount>, userId: String): String =
+//        avocadoCounts.indexOfFirst { it.receiver == userId }
+//            .let { avocadoCounts.subList(
+//                if (it - 2 > 0) it - 2 else 0,
+//                if (it + 3 < avocadoCounts.size) it + 3 else avocadoCounts.size
+//            ) }
+//            .map {
+//                val user = userService.findByUserIdOrGetFromSlack(it.receiver)?.name ?: it.receiver
+//                "${avocadoCounts.indexOf(it) + 1}. $user: ${it.count}"
+//            }
+//            .joinToString(separator = "\n")
 
     private fun <T> List<T>.executeIfNotEmpty(fn: (List<T>) -> Unit): List<T> {
         if (this.isNotEmpty()) fn(this)
